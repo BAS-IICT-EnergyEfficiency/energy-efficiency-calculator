@@ -52,6 +52,10 @@ const translations = {
         thickness_exceeded_note: 'Value has been adjusted to the maximum.',
         thickness_warning: 'Thickness cannot be negative',
         decimal_places_warning: 'Maximum 2 digits after the decimal point allowed',
+        temp_in_min_warning: 'Internal temperature cannot be lower than 10°C',
+        temp_in_max_warning: 'Internal temperature cannot be higher than 30°C',
+        temp_out_min_warning: 'External temperature cannot be lower than -30°C',
+        temp_out_max_warning: 'External temperature cannot be higher than 50°C',
         conductivity_tooltip: 'The ability of a material to transfer heat. Lower values = better insulation.',
         heat_loss_tooltip: 'The amount of energy escaping through the wall in Watts.',
         efficiency_rating: 'Energy Efficiency Rating',
@@ -94,6 +98,10 @@ const translations = {
         thickness_exceeded_note: 'Стойността е коригирана до максимума.',
         thickness_warning: 'Дебелината не може да бъде отрицателна',
         decimal_places_warning: 'Максимум 2 цифри след десетичната запетая',
+        temp_in_min_warning: 'Вътрешната температура не може да е по-ниска от 10°C',
+        temp_in_max_warning: 'Вътрешната температура не може да е по-висока от 30°C',
+        temp_out_min_warning: 'Външната температура не може да е по-ниска от -30°C',
+        temp_out_max_warning: 'Външната температура не може да е по-висока от 50°C',
         conductivity_tooltip: 'Способността на материала да пренася топлина. По-ниски стойности = по-добра изолация.',
         heat_loss_tooltip: 'Количеството енергия, излизащо през стената във Ватове.',
         efficiency_rating: 'Рейтинг на Енергийна Ефективност',
@@ -271,6 +279,41 @@ function calculateHeatLoss() {
     if (isNaN(area) || !materialId || isNaN(thicknessCm) || isNaN(tempIn) || isNaN(tempOut)) {
         alert(translations[currentLang].fill_all_fields);
         return;
+    }
+
+    // Temperature validation
+    const tempInWarning = document.getElementById('tempInWarning');
+    const tempOutWarning = document.getElementById('tempOutWarning');
+    let hasTemperatureError = false;
+
+    // Clear previous warnings
+    tempInWarning.classList.add('d-none');
+    tempOutWarning.classList.add('d-none');
+
+    // Internal temperature validation (10°C to 30°C)
+    if (tempIn < 10) {
+        tempInWarning.querySelector('span').textContent = translations[currentLang].temp_in_min_warning;
+        tempInWarning.classList.remove('d-none');
+        hasTemperatureError = true;
+    } else if (tempIn > 30) {
+        tempInWarning.querySelector('span').textContent = translations[currentLang].temp_in_max_warning;
+        tempInWarning.classList.remove('d-none');
+        hasTemperatureError = true;
+    }
+
+    // External temperature validation (-30°C to +50°C)
+    if (tempOut < -30) {
+        tempOutWarning.querySelector('span').textContent = translations[currentLang].temp_out_min_warning;
+        tempOutWarning.classList.remove('d-none');
+        hasTemperatureError = true;
+    } else if (tempOut > 50) {
+        tempOutWarning.querySelector('span').textContent = translations[currentLang].temp_out_max_warning;
+        tempOutWarning.classList.remove('d-none');
+        hasTemperatureError = true;
+    }
+
+    if (hasTemperatureError) {
+        return; // Block calculation until user fixes the temperature values
     }
 
     // Find material lambda
