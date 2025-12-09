@@ -12,8 +12,24 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Critical CSS to prevent flash of native select arrows -->
+    <style>
+        select,
+        .form-select-custom {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+        }
+
+        select::-ms-expand {
+            display: none;
+        }
+    </style>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="logo-icon.png">
+    <link rel="apple-touch-icon" href="logo-icon.png">
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
 </head>
@@ -22,7 +38,10 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#" data-i18n="brand_name">EcoCalc</a>
+            <a class="navbar-brand" href="#">
+                <img src="logo-icon.png" alt="EcoCalc Logo" class="navbar-logo">
+                <span data-i18n="brand_name">EcoCalc</span>
+            </a>
 
             <div class="d-flex align-items-center gap-3">
                 <button class="btn-theme-toggle" id="themeToggle">
@@ -39,27 +58,16 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="hero-title">
-                        <span data-i18n="hero_title_1">Advanced</span> <span class="highlight"
-                            data-i18n="hero_title_2">Energy Analysis</span>
-                        <br><span data-i18n="hero_title_3">for Modern Buildings</span>
-                    </h1>
-                    <p class="hero-subtitle" data-i18n="hero_subtitle">
-                        Calculate heat loss, evaluate insulation efficiency, and optimize your building's energy
-                        performance with precision engineering tools.
-                    </p>
-                </div>
-                <div class="col-lg-6 d-none d-lg-block">
-                    <div class="hero-visual">
-                        <div class="geometric-shape">
-                            <div class="shape-layer"></div>
-                            <div class="shape-layer"></div>
-                            <div class="shape-layer"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="hero-content text-center">
+                <h1 class="hero-title">
+                    <span data-i18n="hero_title_1">Advanced</span> <span class="highlight"
+                        data-i18n="hero_title_2">Energy Analysis</span>
+                    <span class="hero-title-break"></span><span data-i18n="hero_title_3">for Modern Buildings</span>
+                </h1>
+                <p class="hero-subtitle mx-auto" data-i18n="hero_subtitle">
+                    Calculate heat loss, evaluate insulation efficiency, and optimize your building's energy
+                    performance with precision engineering tools.
+                </p>
             </div>
         </div>
     </section>
@@ -99,15 +107,19 @@
                                             <span class="tooltip-badge" data-bs-toggle="tooltip" data-bs-placement="top"
                                                 title="Select the primary wall material" id="materialTooltip">?</span>
                                         </label>
-                                        <select class="form-select-custom" id="inputMaterial" required>
-                                            <option value="" selected disabled data-i18n="select_material_placeholder">
-                                                Choose
-                                                material...</option>
-                                            <option value="concrete" data-i18n="material_concrete">Concrete</option>
-                                            <option value="brick" data-i18n="material_brick">Brick</option>
-                                            <option value="wood" data-i18n="material_wood">Wood</option>
-                                            <option value="glass" data-i18n="material_glass">Glass</option>
-                                        </select>
+                                        <div class="custom-select-wrapper">
+                                            <select class="form-select-custom" id="inputMaterial" required>
+                                                <option value="" selected disabled
+                                                    data-i18n="select_material_placeholder">
+                                                    Choose
+                                                    material...</option>
+                                                <option value="concrete" data-i18n="material_concrete">Concrete</option>
+                                                <option value="brick" data-i18n="material_brick">Brick</option>
+                                                <option value="wood" data-i18n="material_wood">Wood</option>
+                                                <option value="glass" data-i18n="material_glass">Glass</option>
+                                            </select>
+                                            <i class="bi bi-chevron-down select-arrow"></i>
+                                        </div>
                                     </div>
 
                                     <!-- Thickness Input -->
@@ -210,7 +222,10 @@
             <div class="footer-main">
                 <div class="row">
                     <div class="col-lg-4 mb-4 mb-lg-0">
-                        <div class="footer-brand" data-i18n="brand_name">EcoCalc</div>
+                        <div class="footer-brand">
+                            <img src="logo-icon.png" alt="EcoCalc Logo" class="footer-logo">
+                            <span data-i18n="brand_name">EcoCalc</span>
+                        </div>
                         <p style="color: var(--text-secondary); font-size: 0.9rem; max-width: 300px;"
                             data-i18n="footer_description">
                             Advanced energy efficiency calculations for sustainable building design.
