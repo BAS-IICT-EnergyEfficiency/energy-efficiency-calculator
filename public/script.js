@@ -29,7 +29,7 @@ const translations = {
     en: {
         brand_name: 'EcoCalc',
         lang_toggle: 'EN / BG',
-        hero_title_1: 'Advanced',
+        hero_title_1: '',
         hero_title_2: 'Energy Analysis',
         hero_title_3: 'for Modern Buildings',
         hero_subtitle: 'Calculate heat loss, evaluate insulation efficiency, and optimize your building\'s energy performance with precision engineering tools.',
@@ -75,10 +75,10 @@ const translations = {
     bg: {
         brand_name: 'ЕкоКалк',
         lang_toggle: 'EN / BG',
-        hero_title_1: 'Модерен',
+        hero_title_1: '',
         hero_title_2: 'Енергиен Анализ',
         hero_title_3: 'за Съвременни Сгради',
-        hero_subtitle: 'Изчислете топлинните загуби, оценете ефективността на изолацията и оптимизирайте енергийната ефективност на вашата сграда с прецизни инженерни инструменти.',
+        hero_subtitle: 'Изчислете топлинните загуби, оценете ефективността на изолацията и оптимизирайте енергийната ефективност на вашата сграда.',
         start_calculating: 'Започни Изчисление',
         learn_more: 'Научи Повече',
         calculator_title: 'Калкулатор за Енергийна Ефективност',
@@ -133,7 +133,7 @@ const resultValue = document.getElementById('resultValue');
 const btnBackToTop = document.getElementById('btn-back-to-top');
 
 // Theme: default is dark (green), load from localStorage
-let currentTheme = localStorage.getItem('calculatorTheme') || 'dark';
+let currentTheme = localStorage.getItem('calculatorTheme') || 'light';
 
 function applyTheme(theme) {
     if (theme === 'light') {

@@ -221,7 +221,7 @@ body.light-theme .form-select-custom option {
    ========================================== */
 .hero-section {
     position: relative;
-    padding: 4rem 0 3rem;
+    padding: 1rem 0 0.5rem;
     z-index: 1;
 }
 
@@ -231,10 +231,10 @@ body.light-theme .form-select-custom option {
 }
 
 .hero-title {
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 300;
     line-height: 1.2;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     letter-spacing: -1px;
 }
 
@@ -279,12 +279,12 @@ body.light-theme .form-select-custom option {
 }
 
 .hero-subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--text-secondary);
     max-width: 600px;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     font-weight: 500;
-    line-height: 1.7;
+    line-height: 1.6;
 }
 
 .hero-cta {
@@ -419,7 +419,7 @@ body.light-theme .form-select-custom option {
 .calculator-section {
     position: relative;
     z-index: 1;
-    padding: 2rem 0 4rem;
+    padding: 1rem 0 2rem;
 }
 
 .calculator-card {
@@ -428,7 +428,7 @@ body.light-theme .form-select-custom option {
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 2.5rem;
+    padding: 1.5rem;
     box-shadow:
         0 4px 24px rgba(0, 0, 0, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.05) inset;
@@ -469,7 +469,7 @@ body.light-theme .form-select-custom option {
    Form Controls - Modern Dark Style
    ========================================== */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .form-label-custom {
