@@ -268,6 +268,16 @@ body.light-theme .form-select-custom option {
         margin: 0 0 1.5rem 0;
         max-width: 100%;
     }
+
+    /* Hide hints on mobile for temperature fields */
+    .col-6 .input-hint {
+        display: none;
+    }
+
+    /* Adjust form label for mobile */
+    .form-label-custom {
+        flex-wrap: wrap;
+    }
 }
 
 .hero-title .highlight {
@@ -485,6 +495,13 @@ body.light-theme .form-select-custom option {
 .form-label-custom i {
     color: var(--accent-green);
     font-size: 0.9rem;
+}
+
+.input-hint {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    opacity: 0.7;
 }
 
 .form-control-custom,
@@ -816,7 +833,8 @@ body.light-theme .form-select-custom option {
     align-items: center;
     gap: 0.75rem;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
 }
 
 .footer-list li i {
@@ -933,6 +951,16 @@ body.light-theme .form-select-custom option {
 
     .footer-main {
         padding: 2rem 0 1rem;
+    }
+
+    .footer-list li {
+        white-space: normal;
+        font-size: 0.8rem;
+    }
+
+    .footer-bottom small {
+        font-size: 0.7rem;
+        white-space: nowrap;
     }
 }
 

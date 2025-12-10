@@ -1,5 +1,5 @@
 // Service Worker for EcoCalc PWA
-const CACHE_NAME = 'ecocalc-v8';
+const CACHE_NAME = 'ecocalc-v20';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',

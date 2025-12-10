@@ -38,11 +38,15 @@ const translations = {
         calculator_title: 'Energy Efficiency Calculator',
         calculator_subtitle: 'Enter your building parameters below',
         area_label: 'Area (m²)',
+        area_hint: '(ex. 1 - 1000)',
         select_material_placeholder: 'Choose material...',
         material_label: 'Material',
         thickness_label: 'Thickness (cm)',
+        thickness_hint: '(ex. 0.01 - {max})',
         temp_in_label: 'Internal (°C)',
+        temp_in_hint: '(ex. 10 - 30)',
         temp_out_label: 'External (°C)',
+        temp_out_hint: '(ex. -30 to 50)',
         calculate_btn: 'Calculate Heat Loss',
         result_heading: 'Result',
         heat_loss_label: 'Heat Loss:',
@@ -67,7 +71,7 @@ const translations = {
         footer_student: 'Student: Kristiyan Kirov',
         footer_mentor: 'Mentor: Dr. Veneta Yosifova',
         footer_institute: 'Institute: IICT - BAS',
-        footer_description: 'Advanced energy efficiency calculations for sustainable building design.',
+        footer_description: 'Energy efficiency calculations for sustainable building design.',
         footer_connect: 'Contacts',
         footer_location: 'BAS IV km., ul. "Akad. Georgi Bonchev" 2, Block 2, 1113 Sofia',
         footer_copyright: '© 2025 Energy Efficiency Project | Bulgarian Academy of Sciences'
@@ -84,11 +88,15 @@ const translations = {
         calculator_title: 'Калкулатор за Енергийна Ефективност',
         calculator_subtitle: 'Въведете параметрите на сградата по-долу',
         area_label: 'Площ (m²)',
+        area_hint: '(пр. 1 - 1000)',
         select_material_placeholder: 'Изберете материал...',
         material_label: 'Материал',
         thickness_label: 'Дебелина (cm)',
+        thickness_hint: '(пр. 0,01 - {max})',
         temp_in_label: 'Вътрешна (°C)',
+        temp_in_hint: '(пр. 10 - 30)',
         temp_out_label: 'Външна (°C)',
+        temp_out_hint: '(пр. -30 до 50)',
         calculate_btn: 'Изчисли Топлинни Загуби',
         result_heading: 'Резултат',
         heat_loss_label: 'Топлинни загуби:',
@@ -113,7 +121,7 @@ const translations = {
         footer_student: 'Студент: Кристиян Киров',
         footer_mentor: 'Ментор: д-р Венета Йосифова',
         footer_institute: 'Институт: ИИКТ - БАН',
-        footer_description: 'Модерни изчисления за енергийна ефективност за устойчив дизайн на сгради.',
+        footer_description: 'Изчисления за енергийна ефективност за устойчив дизайн на сгради.',
         footer_connect: 'Контакти',
         footer_location: 'БАН IV км., ул. "Акад. Георги Бончев" 2, Блок 2, 1113 София',
         footer_copyright: '© 2025 Проект Енергийна Ефективност | Българска Академия на Науките'
@@ -159,18 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.log('Service Worker registration failed', err));
     }
 
-    // Set Default Values
-    document.getElementById('inputArea').value = 20;
-    document.getElementById('inputMaterial').value = 'brick';
-    document.getElementById('inputThickness').value = 25;
-    document.getElementById('inputTempIn').value = 22;
-    document.getElementById('inputTempOut').value = 0;
-
-    // Trigger Calculation
-    calculateHeatLoss();
+    // No default values - show empty form with placeholders
 
     // Initialize Tooltips
     updateTooltips();
+
+    // Update thickness hint when material changes
+    materialSelect.addEventListener('change', updateThicknessHint);
 });
 
 // Theme Toggle Event
@@ -238,6 +241,36 @@ function updateLanguage(lang) {
 
     // Update tooltips
     updateTooltips();
+
+    // Update thickness hint for current language
+    updateThicknessHint();
+
+    // Clear any visible warnings to avoid language mismatch
+    clearVisibleWarnings();
+}
+
+function clearVisibleWarnings() {
+    // Hide all warning elements when language changes
+    const thicknessWarning = document.getElementById('thicknessWarning');
+    const tempInWarning = document.getElementById('tempInWarning');
+    const tempOutWarning = document.getElementById('tempOutWarning');
+
+    if (thicknessWarning) thicknessWarning.classList.add('d-none');
+    if (tempInWarning) tempInWarning.classList.add('d-none');
+    if (tempOutWarning) tempOutWarning.classList.add('d-none');
+}
+
+function updateThicknessHint() {
+    const materialId = materialSelect.value;
+    const thicknessHint = document.getElementById('thicknessHint');
+
+    if (!materialId || !thicknessHint) return;
+
+    const material = materials.find(m => m.id === materialId);
+    if (!material) return;
+
+    const hintText = translations[currentLang].thickness_hint.replace('{max}', material.maxThickness);
+    thicknessHint.textContent = hintText;
 }
 
 function updateTooltips() {

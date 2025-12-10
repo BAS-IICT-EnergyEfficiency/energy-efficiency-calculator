@@ -94,6 +94,7 @@
                                         <label class="form-label-custom" for="inputArea">
                                             <i class="bi bi-aspect-ratio"></i>
                                             <span data-i18n="area_label">Area (m²)</span>
+                                            <span class="input-hint" data-i18n="area_hint">(ex. 1 - 1000)</span>
                                         </label>
                                         <input type="number" class="form-control-custom" id="inputArea"
                                             placeholder="e.g., 50" required>
@@ -127,6 +128,7 @@
                                         <label class="form-label-custom" for="inputThickness">
                                             <i class="bi bi-rulers"></i>
                                             <span data-i18n="thickness_label">Thickness (cm)</span>
+                                            <span class="input-hint" id="thicknessHint">(ex. 0.01 - 40)</span>
                                         </label>
                                         <input type="text" inputmode="decimal" class="form-control-custom"
                                             id="inputThickness" placeholder="e.g., 15.50" required>
@@ -143,6 +145,8 @@
                                                 <label class="form-label-custom" for="inputTempIn">
                                                     <i class="bi bi-thermometer-high"></i>
                                                     <span data-i18n="temp_in_label">Internal (°C)</span>
+                                                    <span class="input-hint" data-i18n="temp_in_hint">(ex. 10 -
+                                                        30)</span>
                                                 </label>
                                                 <input type="number" class="form-control-custom" id="inputTempIn"
                                                     placeholder="e.g., 22" required>
@@ -156,6 +160,8 @@
                                                 <label class="form-label-custom" for="inputTempOut">
                                                     <i class="bi bi-thermometer-low"></i>
                                                     <span data-i18n="temp_out_label">External (°C)</span>
+                                                    <span class="input-hint" data-i18n="temp_out_hint">(ex. -30 to
+                                                        50)</span>
                                                 </label>
                                                 <input type="number" class="form-control-custom" id="inputTempOut"
                                                     placeholder="e.g., -5" required>
@@ -259,7 +265,8 @@
                             </li>
                             <li>
                                 <i class="bi bi-geo-alt-fill"></i>
-                                <span data-i18n="footer_location">Sofia, Bulgaria</span>
+                                <a href="https://www.google.com/maps/place/%D0%91%D0%90%D0%9D+IV+%D0%BA%D0%BC.,+ul.+%22Akad.+Georgi+Bonchev%22+2,+1113+Sofia/@42.6754561,23.3684921,17z/data=!3m1!4b1!4m6!3m5!1s0x40aa85dbd8954ce1:0x1326e19b9d086d0a!8m2!3d42.6754522!4d23.371067!16s%2Fg%2F11c4tn_sc0!5m2!1e4!1e2?entry=ttu&g_ep=EgoyMDI1MTIwOC4wIKXMDSoASAFQAw%3D%3D"
+                                    target="_blank" data-i18n="footer_location">Sofia, Bulgaria</a>
                             </li>
                         </ul>
                     </div>
