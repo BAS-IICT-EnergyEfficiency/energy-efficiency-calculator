@@ -769,6 +769,18 @@ body.light-theme .form-select-custom option {
     font-weight: 500;
 }
 
+.efficiency-note {
+    margin-top: 0.75rem;
+    text-align: center;
+}
+
+.efficiency-note small {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.8;
+    font-style: italic;
+}
+
 /* Result Disclaimer */
 .result-disclaimer {
     margin-top: 1.25rem;

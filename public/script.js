@@ -103,7 +103,8 @@ const translations = {
         clear_history: 'Clear',
         clear_history_confirm: 'Are you sure you want to clear all calculation history?',
         delete_entry: 'Delete',
-        result_disclaimer: 'This calculator uses a simplified heat loss model through thermal conductivity of a single material layer and does not include thermal bridges or surface resistances.'
+        result_disclaimer: 'This calculator uses a simplified heat loss model through thermal conductivity of a single material layer and does not include thermal bridges or surface resistances.',
+        efficiency_note: 'The indicator shows normalized heat loss intensity (q = Q / A × ΔT) in W/m²K, independent of area and temperature.'
     },
     bg: {
         brand_name: 'ЕкоКалк',
@@ -159,7 +160,8 @@ const translations = {
         clear_history: 'Изчисти',
         clear_history_confirm: 'Сигурни ли сте, че искате да изчистите цялата история?',
         delete_entry: 'Изтрий',
-        result_disclaimer: 'Калкулаторът и неговите изчисления са базирани на опростен модел за топлинни загуби чрез топлопроводимост през един слой материал и не включват топлинни мостове и повърхностни съпротивления.'
+        result_disclaimer: 'Калкулаторът и неговите изчисления са базирани на опростен модел за топлинни загуби чрез топлопроводимост през един слой материал и не включват топлинни мостове и повърхностни съпротивления.',
+        efficiency_note: 'Индикаторът показва нормализирана интензивност на топлинните загуби (q = Q / A × ΔT) в W/m²K, независима от площта и температурата.'
     }
 };
 
@@ -476,11 +478,25 @@ function calculateHeatLoss() {
     const heatLossWatts = U * area * deltaT; // Heat Loss in Watts
     const heatLossKW = heatLossWatts / 1000; // Convert to kilowatts
 
+    // Calculate normalized heat loss intensity: q = Q / (A × ΔT) = U (W/m²K)
+    // This equals the U-value and is independent of area and temperature
+    const normalizedQ = deltaT > 0 ? heatLossWatts / (area * deltaT) : 0;
+
     // Output in kW
     resultValue.textContent = heatLossKW.toFixed(3);
 
-    // Update Efficiency Bar (using kW values)
-    updateEfficiencyBar(heatLossKW);
+    // Debug: verify normalized q calculation
+    console.log('Efficiency Debug:', {
+        Q_watts: heatLossWatts.toFixed(2),
+        Q_kW: heatLossKW.toFixed(3),
+        A: area,
+        deltaT: deltaT,
+        q_normalized: normalizedQ.toFixed(3),
+        expected_percentage: normalizedQ <= 0.3 ? 0 : (normalizedQ >= 0.6 ? 100 : ((normalizedQ - 0.3) / 0.3 * 100).toFixed(1))
+    });
+
+    // Update Efficiency Bar (using normalized q value in W/m²K)
+    updateEfficiencyBar(normalizedQ);
 
     // Save to Cloud
     saveCalculation({
@@ -516,18 +532,21 @@ async function saveCalculation(data) {
     }
 }
 
-function updateEfficiencyBar(heatLossKW) {
+function updateEfficiencyBar(normalizedQ) {
     const indicator = document.getElementById('efficiencyIndicator');
     let percentage = 0;
 
-    // Logic: < 0.05 kW (50W) = 0% (Green), > 0.2 kW (200W) = 100% (Red)
-    if (heatLossKW <= 0.05) {
+    // Logic based on normalized heat loss intensity q (W/m²K):
+    // q ≤ 0.3 W/m²K = 0% (Green) - Good thermal performance
+    // 0.3 < q ≤ 0.6 W/m²K = interpolated (Yellow/Orange) - Average
+    // q > 0.6 W/m²K = 100% (Red) - Poor thermal performance
+    if (normalizedQ <= 0.3) {
         percentage = 0;
-    } else if (heatLossKW >= 0.2) {
+    } else if (normalizedQ >= 0.6) {
         percentage = 100;
     } else {
-        // Interpolate between 0.05 and 0.2 kW
-        percentage = ((heatLossKW - 0.05) / (0.2 - 0.05)) * 100;
+        // Interpolate between 0.3 and 0.6 W/m²K
+        percentage = ((normalizedQ - 0.3) / (0.6 - 0.3)) * 100;
     }
 
     indicator.style.left = `${percentage}%`;
