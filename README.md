@@ -9,8 +9,9 @@ A modern web application for calculating building heat loss and evaluating energ
 ### Core Functionality
 - **Heat Loss Calculation** - Calculate heat loss through building walls in kilowatts (kW)
 - **Material Database** - Pre-loaded materials with thermal conductivity values and thickness limits
-- **Energy Efficiency Rating** - Visual gradient indicator from Good (green) to Poor (red)
+- **Normalized Efficiency Rating** - Visual indicator based on heat loss intensity (q = Q / A × ΔT), independent of area and temperature
 - **Real-time Validation** - Input validation with translated warning messages
+- **Calculation History** - Local storage of previous calculations
 
 ### User Experience
 - **Bilingual Support** - Full English and Bulgarian language toggle (persisted in localStorage)
@@ -82,10 +83,28 @@ Q = U × A × ΔT
 ```
 
 Where:
-- **Q** = Heat Loss (kW)
-- **U** = Thermal Transmittance (1/R, where R = thickness/λ)
+- **Q** = Heat Loss (W)
+- **U** = Thermal Transmittance (1/R, where R = thickness/λ) in W/m²K
 - **A** = Surface Area (m²)
 - **ΔT** = Temperature Difference (°C)
+
+### Normalized Efficiency Scale
+
+The efficiency indicator uses **normalized heat loss intensity**:
+
+```
+q = Q / (A × ΔT) = U
+```
+
+This value (in W/m²K) is independent of area and temperature inputs:
+
+| q Value | Rating | Color |
+|---------|--------|-------|
+| ≤ 0.3 W/m²K | Good | 🟢 Green |
+| 0.3 – 0.6 W/m²K | Average | 🟡🟠 Yellow/Orange |
+| > 0.6 W/m²K | Poor | 🔴 Red |
+
+> **Note**: The calculator uses a simplified one-layer heat transfer model and does not include thermal bridges or surface resistances.
 
 ## 🎨 Themes
 
@@ -116,6 +135,8 @@ energy-efficiency-calculator/
 │   ├── index.html        # Main HTML (two-column layout)
 │   ├── styles.css        # Theming & responsive styles
 │   ├── script.js         # Logic, translations & validation
+│   ├── admin.html        # Admin panel for materials/settings
+│   ├── admin.js          # Admin panel logic
 │   ├── logo.png          # Full project logo
 │   ├── logo-icon.png     # Square icon for favicon/PWA
 │   ├── manifest.json     # PWA manifest
