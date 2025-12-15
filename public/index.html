@@ -212,6 +212,13 @@
                                             <span data-i18n="rating_poor">Poor</span>
                                         </div>
                                     </div>
+
+                                    <div class="result-disclaimer">
+                                        <i class="bi bi-info-circle"></i>
+                                        <small data-i18n="result_disclaimer">This calculator uses a simplified heat loss
+                                            model through thermal conductivity of a single material layer and does not
+                                            include thermal bridges or surface resistances.</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -221,6 +228,28 @@
         </div>
     </section>
 
+    <!-- Calculation History Section -->
+    <section class="history-section" id="historySection">
+        <div class="container">
+            <div class="history-card">
+                <div class="history-header">
+                    <div class="history-title">
+                        <i class="bi bi-clock-history"></i>
+                        <h5 data-i18n="history_title">Calculation History</h5>
+                    </div>
+                    <button class="btn-clear-history" id="clearHistoryBtn" data-i18n="clear_history">
+                        <i class="bi bi-trash3"></i>
+                        <span>Clear</span>
+                    </button>
+                </div>
+                <div class="history-empty" id="historyEmpty">
+                    <i class="bi bi-calculator"></i>
+                    <p data-i18n="history_empty">No calculations yet. Start calculating to see your history here.</p>
+                </div>
+                <ul class="history-list" id="historyList"></ul>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer-section">

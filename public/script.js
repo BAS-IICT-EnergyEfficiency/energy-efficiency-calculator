@@ -15,14 +15,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Material Database with calibrated max thickness values
-const materials = [
+// Admin Storage Keys
+const ADMIN_MATERIALS_KEY = 'adminMaterials';
+const ADMIN_SETTINGS_KEY = 'adminSettings';
+
+// Default Material Database (used when no admin config exists)
+const DEFAULT_MATERIALS = [
     { id: 'concrete', name_en: 'Concrete', name_bg: 'Бетон', lambda: 1.65, maxThickness: 40 },
     { id: 'brick', name_en: 'Brick wall', name_bg: 'Тухлена стена', lambda: 0.79, maxThickness: 40 },
     { id: 'bitumen', name_en: 'Bitumen insulation', name_bg: 'Битумна изолация', lambda: 0.27, maxThickness: 2 },
     { id: 'wood', name_en: 'Wood', name_bg: 'Дърво', lambda: 0.13, maxThickness: 15 },
     { id: 'glass_wool', name_en: 'Glass wool', name_bg: 'Стъклена вата', lambda: 0.04, maxThickness: 15 }
 ];
+
+// Default Settings (used when no admin config exists)
+const DEFAULT_SETTINGS = {
+    tempIn: { min: 10, max: 30 },
+    tempOut: { min: -30, max: 50 },
+    areaMax: 1000,
+    decimals: 3
+};
+
+// Dynamic getters for admin-configured values
+function getMaterials() {
+    const stored = localStorage.getItem(ADMIN_MATERIALS_KEY);
+    return stored ? JSON.parse(stored) : [...DEFAULT_MATERIALS];
+}
+
+function getSettings() {
+    const stored = localStorage.getItem(ADMIN_SETTINGS_KEY);
+    return stored ? JSON.parse(stored) : { ...DEFAULT_SETTINGS };
+}
 
 // Translations
 const translations = {
@@ -74,7 +97,13 @@ const translations = {
         footer_description: 'Energy efficiency calculations for sustainable building design.',
         footer_connect: 'Contacts',
         footer_location: 'BAS IV km., ul. "Akad. Georgi Bonchev" 2, Block 2, 1113 Sofia',
-        footer_copyright: '© 2025 Energy Efficiency Project | Bulgarian Academy of Sciences'
+        footer_copyright: '© 2025 Energy Efficiency Project | Bulgarian Academy of Sciences',
+        history_title: 'Calculation History',
+        history_empty: 'No calculations yet. Start calculating to see your history here.',
+        clear_history: 'Clear',
+        clear_history_confirm: 'Are you sure you want to clear all calculation history?',
+        delete_entry: 'Delete',
+        result_disclaimer: 'This calculator uses a simplified heat loss model through thermal conductivity of a single material layer and does not include thermal bridges or surface resistances.'
     },
     bg: {
         brand_name: 'ЕкоКалк',
@@ -124,7 +153,13 @@ const translations = {
         footer_description: 'Изчисления за енергийна ефективност за устойчив дизайн на сгради.',
         footer_connect: 'Контакти',
         footer_location: 'БАН IV км., ул. "Акад. Георги Бончев" 2, Блок 2, 1113 София',
-        footer_copyright: '© 2025 Проект Енергийна Ефективност | Българска Академия на Науките'
+        footer_copyright: '© 2025 Проект Енергийна Ефективност | Българска Академия на Науките',
+        history_title: 'История на изчисленията',
+        history_empty: 'Все още няма изчисления. Започнете да калкулирате, за да видите вашата история тук.',
+        clear_history: 'Изчисти',
+        clear_history_confirm: 'Сигурни ли сте, че искате да изчистите цялата история?',
+        delete_entry: 'Изтрий',
+        result_disclaimer: 'Калкулаторът и неговите изчисления са базирани на опростен модел за топлинни загуби чрез топлопроводимост през един слой материал и не включват топлинни мостове и повърхностни съпротивления.'
     }
 };
 
@@ -139,6 +174,13 @@ const calcForm = document.getElementById('calcForm');
 const resultAlert = document.getElementById('resultAlert');
 const resultValue = document.getElementById('resultValue');
 const btnBackToTop = document.getElementById('btn-back-to-top');
+const historyList = document.getElementById('historyList');
+const historyEmpty = document.getElementById('historyEmpty');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+// History constants
+const MAX_HISTORY_ENTRIES = 20;
+const HISTORY_STORAGE_KEY = 'calcHistory';
 
 // Theme: default is dark (green), load from localStorage
 let currentTheme = localStorage.getItem('calculatorTheme') || 'light';
@@ -174,6 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update thickness hint when material changes
     materialSelect.addEventListener('change', updateThicknessHint);
+
+    // Render calculation history on page load
+    renderHistory();
+
+    // Clear history button
+    clearHistoryBtn.addEventListener('click', () => {
+        if (confirm(translations[currentLang].clear_history_confirm)) {
+            localStorage.removeItem(HISTORY_STORAGE_KEY);
+            renderHistory();
+        }
+    });
 });
 
 // Theme Toggle Event
@@ -247,6 +300,9 @@ function updateLanguage(lang) {
 
     // Clear any visible warnings to avoid language mismatch
     clearVisibleWarnings();
+
+    // Re-render history with new language
+    renderHistory();
 }
 
 function clearVisibleWarnings() {
@@ -266,6 +322,7 @@ function updateThicknessHint() {
 
     if (!materialId || !thicknessHint) return;
 
+    const materials = getMaterials();
     const material = materials.find(m => m.id === materialId);
     if (!material) return;
 
@@ -297,6 +354,9 @@ function updateTooltips() {
 }
 
 function populateMaterials() {
+    // Get materials from admin config or defaults
+    const materials = getMaterials();
+
     // Save currently selected value
     const selectedValue = materialSelect.value;
 
@@ -337,6 +397,10 @@ function calculateHeatLoss() {
         return;
     }
 
+    // Get dynamic settings from admin config
+    const settings = getSettings();
+    const materials = getMaterials();
+
     // Temperature validation
     const tempInWarning = document.getElementById('tempInWarning');
     const tempOutWarning = document.getElementById('tempOutWarning');
@@ -346,23 +410,23 @@ function calculateHeatLoss() {
     tempInWarning.classList.add('d-none');
     tempOutWarning.classList.add('d-none');
 
-    // Internal temperature validation (10°C to 30°C)
-    if (tempIn < 10) {
+    // Internal temperature validation (using admin settings)
+    if (tempIn < settings.tempIn.min) {
         tempInWarning.querySelector('span').textContent = translations[currentLang].temp_in_min_warning;
         tempInWarning.classList.remove('d-none');
         hasTemperatureError = true;
-    } else if (tempIn > 30) {
+    } else if (tempIn > settings.tempIn.max) {
         tempInWarning.querySelector('span').textContent = translations[currentLang].temp_in_max_warning;
         tempInWarning.classList.remove('d-none');
         hasTemperatureError = true;
     }
 
-    // External temperature validation (-30°C to +50°C)
-    if (tempOut < -30) {
+    // External temperature validation (using admin settings)
+    if (tempOut < settings.tempOut.min) {
         tempOutWarning.querySelector('span').textContent = translations[currentLang].temp_out_min_warning;
         tempOutWarning.classList.remove('d-none');
         hasTemperatureError = true;
-    } else if (tempOut > 50) {
+    } else if (tempOut > settings.tempOut.max) {
         tempOutWarning.querySelector('span').textContent = translations[currentLang].temp_out_max_warning;
         tempOutWarning.classList.remove('d-none');
         hasTemperatureError = true;
@@ -424,6 +488,19 @@ function calculateHeatLoss() {
         loss: parseFloat(heatLossKW.toFixed(3)),
         date: new Date()
     });
+
+    // Save to local history
+    saveToLocalHistory({
+        id: Date.now(),
+        material_en: material.name_en,
+        material_bg: material.name_bg,
+        area: area,
+        thickness: usedThickness,
+        tempIn: tempIn,
+        tempOut: tempOut,
+        result: parseFloat(heatLossKW.toFixed(3)),
+        date: new Date().toISOString()
+    });
 }
 
 async function saveCalculation(data) {
@@ -454,4 +531,109 @@ function updateEfficiencyBar(heatLossKW) {
     }
 
     indicator.style.left = `${percentage}%`;
+}
+
+// ==========================================
+// Local History Functions
+// ==========================================
+
+function saveToLocalHistory(entry) {
+    const existing = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY)) || [];
+    existing.unshift(entry); // Add newest at the top
+
+    // Limit to MAX_HISTORY_ENTRIES
+    if (existing.length > MAX_HISTORY_ENTRIES) {
+        existing.pop();
+    }
+
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(existing));
+    renderHistory();
+}
+
+function renderHistory() {
+    const entries = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY)) || [];
+
+    // Show/hide empty state
+    if (entries.length === 0) {
+        historyEmpty.classList.remove('d-none');
+        historyList.classList.add('d-none');
+        clearHistoryBtn.style.display = 'none';
+    } else {
+        historyEmpty.classList.add('d-none');
+        historyList.classList.remove('d-none');
+        clearHistoryBtn.style.display = 'flex';
+    }
+
+    // Clear existing items
+    historyList.innerHTML = '';
+
+    // Render each entry
+    entries.forEach(entry => {
+        const li = document.createElement('li');
+        li.className = 'history-item';
+
+        // Get material name based on current language
+        const materialName = currentLang === 'en' ? entry.material_en : entry.material_bg;
+
+        // Format date
+        const date = new Date(entry.date);
+        const formattedDate = formatDate(date);
+
+        // Calculate delta T
+        const deltaT = Math.abs(entry.tempIn - entry.tempOut);
+
+        li.innerHTML = `
+            <div class="history-item-content">
+                <div class="history-item-result">
+                    ${entry.result} <span class="unit">kW</span>
+                </div>
+                <div class="history-item-params">
+                    <span><i class="bi bi-bricks"></i>${materialName}</span>
+                    <span><i class="bi bi-aspect-ratio"></i>${entry.area} m²</span>
+                    <span><i class="bi bi-rulers"></i>${entry.thickness} cm</span>
+                    <span><i class="bi bi-thermometer-half"></i>ΔT: ${deltaT}°C</span>
+                </div>
+            </div>
+            <div class="history-item-meta">
+                <span class="history-item-date">${formattedDate}</span>
+                <button class="btn-delete-history-item" onclick="deleteHistoryEntry(${entry.id})" title="${translations[currentLang].delete_entry}">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        `;
+
+        historyList.appendChild(li);
+    });
+}
+
+function deleteHistoryEntry(id) {
+    const existing = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY)) || [];
+    const filtered = existing.filter(entry => entry.id !== id);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(filtered));
+    renderHistory();
+}
+
+// Make deleteHistoryEntry available globally for onclick
+window.deleteHistoryEntry = deleteHistoryEntry;
+
+function formatDate(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+        return currentLang === 'en' ? 'Just now' : 'Току-що';
+    } else if (diffMins < 60) {
+        return currentLang === 'en' ? `${diffMins} min ago` : `преди ${diffMins} мин`;
+    } else if (diffHours < 24) {
+        return currentLang === 'en' ? `${diffHours}h ago` : `преди ${diffHours}ч`;
+    } else if (diffDays < 7) {
+        return currentLang === 'en' ? `${diffDays}d ago` : `преди ${diffDays}д`;
+    } else {
+        // Format as date
+        const options = { day: 'numeric', month: 'short' };
+        return date.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'bg-BG', options);
+    }
 }
