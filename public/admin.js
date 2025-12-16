@@ -6,6 +6,20 @@ const ADMIN_PASSWORD = 'mentor2025';
 const MATERIALS_KEY = 'adminMaterials';
 const SETTINGS_KEY = 'adminSettings';
 const ADMIN_SESSION_KEY = 'adminSession';
+const FORMULA_SETTINGS_KEY = 'formulaSettings';
+
+// Default formula settings
+const DEFAULT_FORMULA_SETTINGS = {
+    useAbsoluteValue: false,
+    descriptions: {
+        q_desc: { en: 'Heat loss (Watts)', bg: 'Топлинна загуба (Вата)' },
+        u_desc: { en: 'Thermal transmittance (W/m²K)', bg: 'Термично съпротивление (W/m²K)' },
+        lambda_desc: { en: 'Thermal conductivity (W/m·K)', bg: 'Топлопроводимост (W/m·K)' },
+        d_desc: { en: 'Material thickness (m)', bg: 'Дебелина на материала (m)' },
+        a_desc: { en: 'Wall area (m²)', bg: 'Площ на стената (m²)' },
+        dt_desc: { en: 'Temperature difference (°C)', bg: 'Температурна разлика (°C)' }
+    }
+};
 
 // Default materials (same as main calculator)
 const DEFAULT_MATERIALS = [
@@ -41,7 +55,7 @@ const translations = {
         admin_formula_title: 'Heat Loss Formula',
         formula_q_desc: 'Heat loss (Watts)',
         formula_u_desc: 'Thermal transmittance (W/m²K)',
-        formula_lambda_desc: 'Thermal conductivity (W/mK)',
+        formula_lambda_desc: 'Thermal conductivity (W/m·K)',
         formula_d_desc: 'Material thickness (m)',
         formula_a_desc: 'Wall area (m²)',
         formula_dt_desc: 'Temperature difference (°C)',
@@ -51,7 +65,7 @@ const translations = {
         admin_edit_material: 'Edit Material',
         admin_th_name_en: 'Name (EN)',
         admin_th_name_bg: 'Name (BG)',
-        admin_th_lambda: 'λ (W/mK)',
+        admin_th_lambda: 'λ (W/m·K)',
         admin_th_max_thickness: 'Max Thickness (cm)',
         admin_th_actions: 'Actions',
         admin_settings_title: 'Calculator Settings',
@@ -86,6 +100,12 @@ const translations = {
         admin_config_imported: 'Configuration imported successfully!',
         admin_config_reset: 'All settings reset to defaults!',
         admin_import_error: 'Error importing file. Please check the format.',
+        admin_formula_settings: 'Formula Settings',
+        admin_use_absolute: 'Use absolute value for ΔT',
+        admin_absolute_hint: '(|Tin - Tout| instead of Tin - Tout)',
+        admin_formula_components: 'Formula Components',
+        admin_save_formula: 'Save Formula Settings',
+        admin_formula_saved: 'Formula settings saved successfully!',
         lang_toggle: 'EN / BG'
     },
     bg: {
@@ -103,7 +123,7 @@ const translations = {
         admin_formula_title: 'Формула за Топлинни Загуби',
         formula_q_desc: 'Топлинна загуба (Вата)',
         formula_u_desc: 'Термично съпротивление (W/m²K)',
-        formula_lambda_desc: 'Топлопроводимост (W/mK)',
+        formula_lambda_desc: 'Топлопроводимост (W/m·K)',
         formula_d_desc: 'Дебелина на материала (m)',
         formula_a_desc: 'Площ на стената (m²)',
         formula_dt_desc: 'Температурна разлика (°C)',
@@ -113,7 +133,7 @@ const translations = {
         admin_edit_material: 'Редактирай Материал',
         admin_th_name_en: 'Име (EN)',
         admin_th_name_bg: 'Име (BG)',
-        admin_th_lambda: 'λ (W/mK)',
+        admin_th_lambda: 'λ (W/m·K)',
         admin_th_max_thickness: 'Макс. Дебелина (cm)',
         admin_th_actions: 'Действия',
         admin_settings_title: 'Настройки на Калкулатора',
@@ -148,6 +168,12 @@ const translations = {
         admin_config_imported: 'Конфигурацията е импортирана успешно!',
         admin_config_reset: 'Всички настройки са нулирани!',
         admin_import_error: 'Грешка при импортиране. Проверете формата на файла.',
+        admin_formula_settings: 'Настройки на Формулата',
+        admin_use_absolute: 'Използвай абсолютна стойност за ΔT',
+        admin_absolute_hint: '(|Tin - Tout| вместо Tin - Tout)',
+        admin_formula_components: 'Компоненти на Формулата',
+        admin_save_formula: 'Запази Настройки на Формулата',
+        admin_formula_saved: 'Настройките на формулата са запазени успешно!',
         lang_toggle: 'EN / BG'
     }
 };
@@ -163,7 +189,10 @@ const loginForm = document.getElementById('loginForm');
 const loginError = document.getElementById('loginError');
 const adminPassword = document.getElementById('adminPassword');
 const logoutBtn = document.getElementById('logoutBtn');
-const langToggleBtn = document.getElementById('langToggle');
+const langBtnBG = document.getElementById('langBG');
+const langBtnEN = document.getElementById('langEN');
+const loginLangBtnBG = document.getElementById('loginLangBG');
+const loginLangBtnEN = document.getElementById('loginLangEN');
 const themeToggleBtn = document.getElementById('themeToggle');
 
 // Initialize
@@ -179,6 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apply language
     updateLanguage(currentLang);
 
+    // Set initial language button states
+    updateLangButtonStates();
+
     // Initialize tabs
     initTabs();
 
@@ -193,6 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize export/import
     initExportImport();
+
+    // Initialize formula settings
+    initFormulaSettings();
 });
 
 // Login form handler
@@ -223,13 +258,80 @@ themeToggleBtn.addEventListener('click', () => {
     localStorage.setItem('calculatorTheme', currentTheme);
 });
 
-// Language toggle
-langToggleBtn.addEventListener('click', () => {
-    currentLang = currentLang === 'en' ? 'bg' : 'en';
-    localStorage.setItem('selectedLang', currentLang);
-    updateLanguage(currentLang);
-    renderMaterials();
-});
+// Language button state management (handles both login page and admin panel buttons)
+function updateLangButtonStates() {
+    // Admin panel buttons
+    if (langBtnBG && langBtnEN) {
+        if (currentLang === 'bg') {
+            langBtnBG.classList.add('active');
+            langBtnEN.classList.remove('active');
+        } else {
+            langBtnEN.classList.add('active');
+            langBtnBG.classList.remove('active');
+        }
+    }
+
+    // Login page buttons
+    if (loginLangBtnBG && loginLangBtnEN) {
+        if (currentLang === 'bg') {
+            loginLangBtnBG.classList.add('active');
+            loginLangBtnEN.classList.remove('active');
+        } else {
+            loginLangBtnEN.classList.add('active');
+            loginLangBtnBG.classList.remove('active');
+        }
+    }
+}
+
+// Language toggles - Admin panel
+if (langBtnBG) {
+    langBtnBG.addEventListener('click', () => {
+        if (currentLang !== 'bg') {
+            currentLang = 'bg';
+            localStorage.setItem('selectedLang', currentLang);
+            updateLanguage(currentLang);
+            updateLangButtonStates();
+            renderMaterials();
+            loadFormulaSettings();
+        }
+    });
+}
+
+if (langBtnEN) {
+    langBtnEN.addEventListener('click', () => {
+        if (currentLang !== 'en') {
+            currentLang = 'en';
+            localStorage.setItem('selectedLang', currentLang);
+            updateLanguage(currentLang);
+            updateLangButtonStates();
+            renderMaterials();
+            loadFormulaSettings();
+        }
+    });
+}
+
+// Language toggles - Login page
+if (loginLangBtnBG) {
+    loginLangBtnBG.addEventListener('click', () => {
+        if (currentLang !== 'bg') {
+            currentLang = 'bg';
+            localStorage.setItem('selectedLang', currentLang);
+            updateLanguage(currentLang);
+            updateLangButtonStates();
+        }
+    });
+}
+
+if (loginLangBtnEN) {
+    loginLangBtnEN.addEventListener('click', () => {
+        if (currentLang !== 'en') {
+            currentLang = 'en';
+            localStorage.setItem('selectedLang', currentLang);
+            updateLanguage(currentLang);
+            updateLangButtonStates();
+        }
+    });
+}
 
 function showAdminPanel() {
     loginOverlay.classList.add('d-none');
@@ -548,4 +650,103 @@ function showToast(message) {
     toastMessage.innerHTML = `<i class="bi bi-check-circle-fill me-2" style="color: var(--accent-green);"></i>${message}`;
     const toast = new bootstrap.Toast(toastEl);
     toast.show();
+}
+
+// ==========================================
+// Formula Settings Functions
+// ==========================================
+
+function getFormulaSettings() {
+    const stored = localStorage.getItem(FORMULA_SETTINGS_KEY);
+    return stored ? JSON.parse(stored) : { ...DEFAULT_FORMULA_SETTINGS };
+}
+
+function saveFormulaSettingsToStorage(settings) {
+    localStorage.setItem(FORMULA_SETTINGS_KEY, JSON.stringify(settings));
+}
+
+function loadFormulaSettings() {
+    const settings = getFormulaSettings();
+
+    // Set toggle state
+    const absToggle = document.getElementById('useAbsoluteValue');
+    if (absToggle) {
+        absToggle.checked = settings.useAbsoluteValue;
+    }
+
+    // Set description inputs - use current language, fall back to default descriptions
+    const descInputs = document.querySelectorAll('.formula-desc-input');
+    descInputs.forEach(input => {
+        const key = input.getAttribute('data-key');
+        // First try to get from saved settings
+        if (settings.descriptions && settings.descriptions[key]) {
+            const desc = settings.descriptions[key];
+            // If it's an object with language keys
+            if (typeof desc === 'object' && desc[currentLang]) {
+                input.value = desc[currentLang];
+            } else if (typeof desc === 'object' && desc.en) {
+                // Fall back to English if current language not available
+                input.value = desc.en;
+            } else if (typeof desc === 'string') {
+                // Legacy: if it's just a string
+                input.value = desc;
+            }
+        } else if (DEFAULT_FORMULA_SETTINGS.descriptions && DEFAULT_FORMULA_SETTINGS.descriptions[key]) {
+            // Fall back to default descriptions
+            const defaultDesc = DEFAULT_FORMULA_SETTINGS.descriptions[key];
+            input.value = defaultDesc[currentLang] || defaultDesc.en;
+        }
+    });
+
+    // Update formula display
+    updateFormulaDisplay(settings.useAbsoluteValue);
+}
+
+function updateFormulaDisplay(useAbsolute) {
+    const formulaExpanded = document.getElementById('formulaExpanded');
+    if (formulaExpanded) {
+        if (useAbsolute) {
+            formulaExpanded.innerHTML = 'Q = (λ / d) × A × |T<sub>in</sub> - T<sub>out</sub>|';
+        } else {
+            formulaExpanded.innerHTML = 'Q = (λ / d) × A × (T<sub>in</sub> - T<sub>out</sub>)';
+        }
+    }
+}
+
+function initFormulaSettings() {
+    const absToggle = document.getElementById('useAbsoluteValue');
+    const saveBtn = document.getElementById('saveFormulaBtn');
+
+    // Toggle change handler - update display immediately
+    if (absToggle) {
+        absToggle.addEventListener('change', () => {
+            updateFormulaDisplay(absToggle.checked);
+        });
+    }
+
+    // Save button handler
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            const settings = getFormulaSettings();
+
+            // Get toggle state
+            settings.useAbsoluteValue = absToggle ? absToggle.checked : false;
+
+            // Get description values
+            const descInputs = document.querySelectorAll('.formula-desc-input');
+            descInputs.forEach(input => {
+                const key = input.getAttribute('data-key');
+                if (!settings.descriptions[key]) {
+                    settings.descriptions[key] = { en: '', bg: '' };
+                }
+                settings.descriptions[key][currentLang] = input.value;
+            });
+
+            saveFormulaSettingsToStorage(settings);
+            showToast(translations[currentLang].admin_formula_saved);
+        });
+    }
+
+    // Load existing settings
+    loadFormulaSettings();
 }
