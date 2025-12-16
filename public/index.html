@@ -32,6 +32,8 @@
     <link rel="apple-touch-icon" href="logo-icon.png">
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -47,10 +49,10 @@
                 <button class="btn-theme-toggle" id="themeToggle">
                     <i class="bi bi-sun-fill"></i>
                 </button>
-                <button class="btn-lang-toggle" id="langToggle">
-                    <i class="bi bi-globe2"></i>
-                    <span data-i18n="lang_toggle">EN / BG</span>
-                </button>
+                <div class="lang-switcher" id="langSwitcher">
+                    <button class="lang-btn" id="langBG" data-lang="bg">BG</button>
+                    <button class="lang-btn" id="langEN" data-lang="en">EN</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -98,6 +100,9 @@
                                         </label>
                                         <input type="number" class="form-control-custom" id="inputArea"
                                             placeholder="e.g., 50" required>
+                                        <div id="areaWarning" class="form-warning d-none">
+                                            <i class="bi bi-exclamation-circle"></i> <span></span>
+                                        </div>
                                     </div>
 
                                     <!-- Material Select -->
@@ -242,10 +247,16 @@
                         <i class="bi bi-clock-history"></i>
                         <h5 data-i18n="history_title">Calculation History</h5>
                     </div>
-                    <button class="btn-clear-history" id="clearHistoryBtn" data-i18n="clear_history">
-                        <i class="bi bi-trash3"></i>
-                        <span>Clear</span>
-                    </button>
+                    <div class="history-actions">
+                        <button class="btn-export-history" id="exportHistoryBtn" title="Export to CSV">
+                            <i class="bi bi-download"></i>
+                            <span data-i18n="export_csv">Export</span>
+                        </button>
+                        <button class="btn-clear-history" id="clearHistoryBtn" data-i18n="clear_history">
+                            <i class="bi bi-trash3"></i>
+                            <span>Clear</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="history-empty" id="historyEmpty">
                     <i class="bi bi-calculator"></i>
