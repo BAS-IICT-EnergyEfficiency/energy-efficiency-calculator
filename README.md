@@ -163,4 +163,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-**© 2025 Energy Efficiency Project | Bulgarian Academy of Sciences**
+**© 2026 Energy Efficiency Project | Bulgarian Academy of Sciences**
