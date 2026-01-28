@@ -1,3 +1,9 @@
+/**
+ * Energy Efficiency Calculator - Server
+ * Project finalized: January 2026
+ * © 2026 IICT-BAS
+ */
+
 const express = require('express');
 const path = require('path');
 const app = express();
