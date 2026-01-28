@@ -1,6 +1,6 @@
 // Admin Panel JavaScript
 // Password for admin access (can be changed)
-const ADMIN_PASSWORD = 'mentor2025';
+const ADMIN_PASSWORD = 'mentor2026';
 
 // Storage keys
 const MATERIALS_KEY = 'adminMaterials';

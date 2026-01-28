@@ -1047,7 +1047,7 @@ body.light-theme .form-select-custom option {
 }
 
 .calculator-header-section p {
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-size: 0.95rem;
 }
 
